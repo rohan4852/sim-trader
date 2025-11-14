@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from src import generator
+from . import generator
 from src.engine import SimpleMAStrategy
 from src.portfolio import Portfolio
 from src import sim_backend
