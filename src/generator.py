@@ -11,6 +11,7 @@ def generate_prices(symbol="SYM", n=1000, start_price=100.0, mu=0.0, sigma=0.01,
         if np.random.rand() < jump_prob:
             ret += np.random.normal(loc=0, scale=jump_scale)
         prices.append(prices[-1] * (1 + ret))
-    times = pd.date_range("2025-01-01", periods=n, freq="T")  # 1-minute ticks
+    # Use 'min' for minute frequency (FutureWarning: 'T' deprecated)
+    times = pd.date_range("2025-01-01", periods=n, freq="min")  # 1-minute ticks
     df = pd.DataFrame({"timestamp": times, "symbol": symbol, "price": prices})
     return df
