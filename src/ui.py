@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from . import generator
+from src import generator
 from src.engine import SimpleMAStrategy
 from src.portfolio import Portfolio
 from src import sim_backend
@@ -44,9 +44,11 @@ def request_rerun():
 			return
 		except Exception:
 			pass
-	# fallback: change a query param which triggers a rerun
+	# fallback: use st.query_params to trigger rerun (replaces deprecated experimental_set_query_params)
 	try:
-		st.experimental_set_query_params(_sim_rerun=int(time.time() * 1000))
+		if hasattr(st, 'query_params'):
+			st.query_params._mutable = True
+			st.query_params['_sim_rerun'] = int(time.time() * 1000)
 	except Exception:
 		# last resort: no-op
 		return
@@ -272,19 +274,5 @@ else:
 	render_ui()
 
 
-# Helper for forcing a rerun in a Streamlit-version-compatible way
-def request_rerun():
-	# prefer official API if present
-	if hasattr(st, 'experimental_rerun'):
-		try:
-			st.experimental_rerun()
-			return
-		except Exception:
-			pass
-	# fallback: change a query param which triggers a rerun
-	try:
-		st.experimental_set_query_params(_sim_rerun=int(time.time() * 1000))
-	except Exception:
-		# last resort: no-op
-		return
+# (request_rerun is already defined earlier in the file)
 
