@@ -1,7 +1,12 @@
 import time
+import os
+import sys
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# Add parent directory to sys.path so 'src' package can be imported
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src import generator
 from src.engine import SimpleMAStrategy
