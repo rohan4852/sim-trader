@@ -234,9 +234,16 @@ def render_ui():
 		else:
 			prices_df = prices
 		if prices_df is not None and len(prices_df) > 0:
-			recent = prices_df.iloc[:max(1, idx)]
-			fig, ax = plt.subplots()
-			ax.plot(recent['timestamp'], recent['price'], label='price')
+			# Show all generated prices (not just up to idx) when no simulation running
+			# This way charts don't appear empty after Generate/Reset
+			if st.session_state.running or st.session_state.get('running_bg'):
+				# During simulation, show only ticks processed so far
+				recent = prices_df.iloc[:max(1, idx)]
+			else:
+				# When paused/stopped, show all generated data for context
+				recent = prices_df
+			fig, ax = plt.subplots(figsize=(10, 5))
+			ax.plot(recent['timestamp'], recent['price'], label='price', linewidth=1.5)
 			ax.set_title(f"{symbol} price (ticks: {idx}/{len(prices_df)})")
 			ax.set_xlabel('Time')
 			ax.set_ylabel('Price')
@@ -246,15 +253,15 @@ def render_ui():
 	# trades / history
 	if not hdf.empty:
 		trades_placeholder.dataframe(hdf.tail(10))
-		fig2, ax2 = plt.subplots()
+		fig2, ax2 = plt.subplots(figsize=(10, 5))
 		hdf.set_index(pd.to_datetime(hdf['timestamp']), inplace=False)[['realized_pnl','unrealized_pnl']].cumsum().plot(ax=ax2)
 		ax2.set_title('Cumulative P&L')
 		ax2.set_ylabel('P&L')
 		metrics_placeholder.write(hdf.iloc[-1].to_dict())
 		st.pyplot(fig2)
 	else:
-		trades_placeholder.write("No trades yet")
-		metrics_placeholder.write({})
+		trades_placeholder.write("No trades yet. Click 'Start' to begin simulation.")
+		metrics_placeholder.write({"status": "Waiting for simulation to start..."})
 
 
 # Main loop: advance one step when running
